@@ -2,6 +2,7 @@
 src = "src"
 out = "out"
 libs = ["base"]
+ignored_warnings = ["Source not found", "File import callback failed"]
 
 remappings = [
     "@openzeppelin/contracts=base/openzeppelin-contracts/contracts",

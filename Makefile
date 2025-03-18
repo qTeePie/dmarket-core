@@ -1,6 +1,6 @@
 # Variables
 RPC_URL=http://127.0.0.1:8545
-SCRIPT=script/Deploy.s.sol
+SCRIPT=script/DeploySimpleNFT.s.sol
 OZ_LIB=base/openzeppelin-contracts
 
 # Start Anvil (local testnet)
@@ -18,7 +18,7 @@ build: install
 
 # Deploy contract
 deploy: build
-	forge script $(SCRIPT) --rpc-url $(RPC_URL) --broadcast
+	forge script $(SCRIPT) --rpc-url $(RPC_URL) --broadcast --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
 # Run tests
 test: build
