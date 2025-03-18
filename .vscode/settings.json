@@ -1,0 +1,6 @@
+{
+    "solidity.compileUsingRemoteVersion": "none",
+    "solidity.defaultCompiler": "localNodeModule",
+    "solidity.packageDefaultDependenciesContractsDirectory": "",
+    "solidity.packageDefaultDependenciesDirectory": "base"
+}
