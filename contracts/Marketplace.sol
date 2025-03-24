@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NFTMarketplace is Ownable {
+contract DMarket is Ownable {
     struct Listing {
         address seller;
         address nftContract;
