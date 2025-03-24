@@ -11,18 +11,18 @@ contract TestDNFT is Test {
 
     DNFT dnft;
 
-    address user = address("user");
+    address user = address(1);
 
     function setUp() public {
         //DeployDNFT deployer = new DeployDNFT();
         //deployer.run();
-        dnft = new DNFT(address(this));
+        dnft = new DNFT();
         console2.log("Workie");
     }
 
     function testMint() public {
         dnft.mintNFT(user, "ipfs://test-uri");
-        assertEq(dnft.ownerOf(0), address(0x123), "Owner should be correct");
+        assertEq(dnft.ownerOf(0), address(1), "Owner should be correct");
     }
 
     function testTokenIdIncrements() public {
