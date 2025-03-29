@@ -1,6 +1,4 @@
 {
-    "solidity.compileUsingRemoteVersion": "none",
-    "solidity.defaultCompiler": "localNodeModule",
-    "solidity.packageDefaultDependenciesContractsDirectory": "",
-    "solidity.packageDefaultDependenciesDirectory": "base"
+    "solidity.defaultCompiler": "remote",
+    "solidity.compileUsingLocalVersion": "/home/rebel/projects/nft-marketplace/soljson-v0.8.20+commit.a1b79de6.js"
 }

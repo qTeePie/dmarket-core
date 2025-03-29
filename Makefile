@@ -1,4 +1,7 @@
 # Variables
+include .env
+export $(shell sed 's/=.*//' .env)
+
 RPC_URL=http://127.0.0.1:8545
 SCRIPT=script/DeploySimpleNFT.s.sol
 OZ_LIB=base/openzeppelin-contracts
@@ -32,3 +35,6 @@ fmt:
 clean:
 	forge clean
 	rm -rf base/openzeppelin-contracts
+
+deploy-market:
+	forge script script/DeployDMarket.s.sol --rpc-url $(RPC_URL) --broadcast --private-key $(PRIVATE_KEY)

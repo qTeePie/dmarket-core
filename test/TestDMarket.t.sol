@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {DNFT} from "contracts/DNFT.sol";
-import {DMarket} from "contracts/Marketplace.sol";
+import {DMarket} from "contracts/DMarket.sol";
 
 contract TestDMarketplace is Test {
     string constant TOKEN_URI = "ipfs://test-uri";
