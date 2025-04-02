@@ -16,6 +16,9 @@ contract DMarket is Ownable {
     mapping(uint256 => Listing) public listings;
     uint256 public listingCounter;
 
+    // Prevent re-listing by checking nftContract tokenId is listed
+    mapping(address => mapping(uint256 => bool)) public isListed;
+
     event NFTListed(
         uint256 indexed listingId, address indexed seller, address nftContract, uint256 tokenId, uint256 price
     );
@@ -29,8 +32,15 @@ contract DMarket is Ownable {
         require(nft.ownerOf(tokenId) == msg.sender, "Not your NFT");
         require(nft.getApproved(tokenId) == address(this), "Marketplace not approved");
 
+        // Check if listing already exists
+        require(!isListed[nftContract][tokenId], "Listing already exists");
+
+        // Listing doesn't exist => create listing
         listings[listingCounter] = Listing(msg.sender, nftContract, tokenId, price, true);
+        isListed[nftContract][tokenId] = true;
+
         emit NFTListed(listingCounter, msg.sender, nftContract, tokenId, price);
+
         listingCounter++;
     }
 
