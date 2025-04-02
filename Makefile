@@ -21,7 +21,7 @@ build: install
 
 # Deploy contract
 deploy: build
-	forge script $(SCRIPT) --rpc-url $(RPC_URL) --broadcast --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+	forge script $(SCRIPT) --rpc-url $(RPC_URL) --broadcast --private-key $(PRIVATE_KEY) --chain-id 1111
 
 # Run tests
 test: build
@@ -38,3 +38,7 @@ clean:
 
 deploy-market:
 	forge script script/DeployDMarket.s.sol --rpc-url $(RPC_URL) --broadcast --private-key $(PRIVATE_KEY)
+
+# Read NFT Listing mapping
+read-listing:
+	cast call $(MARKETPLACE) "listings(uint256)(address,address,uint256,uint256,bool)" $(LISTING_ID) --rpc-url $(RPC_URL)
