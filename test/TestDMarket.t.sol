@@ -18,12 +18,11 @@ contract TestDMarketplace is Test {
         marketplace = new DMarket();
     }
 
-    /*
-        Security Test: Prevent duplicate active listings
-        This test ensures that an NFT cannot be listed multiple times without being sold or delisted first.
-        Prevents potential attack vectors, stale data, and unnecessary state bloat.
-    */
-
+    /**
+     * Security Test: Prevent duplicate active listings
+     * This test ensures that an NFT cannot be listed multiple times without being sold or delisted first.
+     * Prevents potential attack vectors, stale data, and unnecessary state bloat.
+     */
     function testNoDuplicateListings() public {
         mintAndApprove(user, 0);
         // List NFT
