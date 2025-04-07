@@ -24,35 +24,40 @@ contract TestDMarketplace is Test {
      * Prevents potential attack vectors, stale data, and unnecessary state bloat.
      */
     function testNoDuplicateListings() public {
-        mintAndApprove(user, 0);
+        uint256 tokenId = mintAndApprove(user);
         // List NFT
         vm.prank(user);
-        marketplace.listNFT(address(nft), 0, 1); // List NFT again
+        marketplace.listNFT(address(nft), tokenId, 1); // List NFT again
         vm.prank(user);
 
         vm.expectRevert("Listing already exists");
-        marketplace.listNFT(address(nft), 0, 1);
+        marketplace.listNFT(address(nft), tokenId, 1);
     }
 
     function testCanListNFT() public {
-        mintAndApprove(user, 0);
+        uint256 tokenId = mintAndApprove(user);
 
         // List the NFT
         vm.prank(user);
-        marketplace.listNFT(address(nft), 0, 1 ether);
+        marketplace.listNFT(address(nft), tokenId, 1 ether);
 
         // Check listing was stored
-        (address seller, address nftAddr, uint256 tokenId, uint256 price, bool active) = marketplace.listings(0);
+        (address seller, address nftAddr, uint256 listedTokenId, uint256 price, bool active) = marketplace.listings(0);
 
         assertEq(seller, user, "Seller should match");
         assertEq(nftAddr, address(nft), "NFT contract address should match");
-        assertEq(tokenId, 0, "Token ID should match");
+        assertEq(listedTokenId, tokenId, "Token ID should match");
         assertEq(price, 1 ether, "Price should match");
         assertEq(active, true, "Listing should be active");
     }
 
-    function mintAndApprove(address to, uint256 tokenId) private {
+    /*function testBuyNFT() {
+        mintAndApprove(user, 0);
+    }*/
+
+    function mintAndApprove(address to) private returns (uint256 tokenId) {
         // Mint to user
+        tokenId = nft.nextTokenId();
         vm.startPrank(to);
         nft.mint(to);
 
