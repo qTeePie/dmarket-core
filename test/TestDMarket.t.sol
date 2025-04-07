@@ -53,7 +53,7 @@ contract TestDMarketplace is Test {
 
     function testBuyNFT() public {
         uint256 tokenId = mintAndApprove(user);
-        uint256 currentId = marketplace.listingCounter();
+        uint256 listingId = marketplace.listingCounter();
         uint256 price = 1 ether;
 
         vm.prank(user);
@@ -62,12 +62,30 @@ contract TestDMarketplace is Test {
         address buyer = makeAddr("buyer");
         vm.deal(buyer, price * 2);
 
-        vm.prank(buyer);
-        marketplace.buyNFT{value: price}(currentId);
+        vm.expectEmit(true, true, false, false, address(marketplace));
+        emit DMarket.NFTBought(listingId, buyer, price);
 
-        assertEq(marketplace.listingCounter(), currentId + 1, "Listing counter should increment");
+        vm.prank(buyer);
+        marketplace.buyNFT{value: price}(listingId);
+
+        assertEq(marketplace.listingCounter(), listingId + 1, "Listing counter should increment");
         assertEq(marketplace.isListed(address(nft), tokenId, user), false, "Listing should be removed");
         assertEq(nft.ownerOf(tokenId), buyer, "Ownership should be transferred");
+    }
+
+    function testDelistNFT() public {
+        uint256 tokenId = mintAndApprove(user);
+        uint256 listingId = marketplace.listingCounter();
+        uint256 price = 1 ether;
+
+        vm.prank(user);
+        marketplace.listNFT(address(nft), tokenId, price);
+
+        vm.prank(user);
+        marketplace.delistNFT(listingId);
+
+        assertEq(marketplace.listingCounter(), listingId + 1, "Listing should increment");
+        assertEq(marketplace.isListed(address(nft), tokenId, user), false, "Listing should be removed");
     }
 
     function mintAndApprove(address to) private returns (uint256 tokenId) {
