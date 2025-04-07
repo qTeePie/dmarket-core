@@ -51,9 +51,24 @@ contract TestDMarketplace is Test {
         assertEq(active, true, "Listing should be active");
     }
 
-    /*function testBuyNFT() {
-        mintAndApprove(user, 0);
-    }*/
+    function testBuyNFT() public {
+        uint256 tokenId = mintAndApprove(user);
+        uint256 currentId = marketplace.listingCounter();
+        uint256 price = 1 ether;
+
+        vm.prank(user);
+        marketplace.listNFT(address(nft), tokenId, price);
+
+        address buyer = makeAddr("buyer");
+        vm.deal(buyer, price * 2);
+
+        vm.prank(buyer);
+        marketplace.buyNFT{value: price}(currentId);
+
+        assertEq(marketplace.listingCounter(), currentId + 1, "Listing counter should increment");
+        assertEq(marketplace.isListed(address(nft), tokenId, user), false, "Listing should be removed");
+        assertEq(nft.ownerOf(tokenId), buyer, "Ownership should be transferred");
+    }
 
     function mintAndApprove(address to) private returns (uint256 tokenId) {
         // Mint to user
