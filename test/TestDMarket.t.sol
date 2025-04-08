@@ -18,31 +18,21 @@ contract TestDMarketplace is Test {
         marketplace = new DMarket();
     }
 
-    /**
-     * Security Test: Prevent duplicate active listings
-     * This test ensures that an NFT cannot be listed multiple times without being sold or delisted first.
-     * Prevents potential attack vectors, stale data, and unnecessary state bloat.
-     */
     function testNoDuplicateListings() public {
         uint256 tokenId = mintAndApprove(user);
-        // List NFT
-        vm.prank(user);
-        marketplace.listNFT(address(nft), tokenId, 1); // List NFT again
-        vm.prank(user);
+        listNFT(user, tokenId, 1);
 
+        vm.prank(user);
         vm.expectRevert("Listing already exists");
         marketplace.listNFT(address(nft), tokenId, 1);
     }
 
     function testCanListNFT() public {
         uint256 tokenId = mintAndApprove(user);
+        uint256 listingId = listNFT(user, tokenId, 1 ether);
 
-        // List the NFT
-        vm.prank(user);
-        marketplace.listNFT(address(nft), tokenId, 1 ether);
-
-        // Check listing was stored
-        (address seller, address nftAddr, uint256 listedTokenId, uint256 price, bool active) = marketplace.listings(0);
+        (address seller, address nftAddr, uint256 listedTokenId, uint256 price, bool active) =
+            marketplace.listings(listingId);
 
         assertEq(seller, user, "Seller should match");
         assertEq(nftAddr, address(nft), "NFT contract address should match");
@@ -52,14 +42,11 @@ contract TestDMarketplace is Test {
     }
 
     function testBuyNFT() public {
-        uint256 tokenId = mintAndApprove(user);
-        uint256 listingId = marketplace.listingCounter();
+        address buyer = makeAddr("buyer");
         uint256 price = 1 ether;
 
-        vm.prank(user);
-        marketplace.listNFT(address(nft), tokenId, price);
+        (uint256 tokenId, uint256 listingId) = mintAndList(user, price);
 
-        address buyer = makeAddr("buyer");
         vm.deal(buyer, price * 2);
 
         vm.expectEmit(true, true, false, false, address(marketplace));
@@ -74,12 +61,7 @@ contract TestDMarketplace is Test {
     }
 
     function testDelistNFT() public {
-        uint256 tokenId = mintAndApprove(user);
-        uint256 listingId = marketplace.listingCounter();
-        uint256 price = 1 ether;
-
-        vm.prank(user);
-        marketplace.listNFT(address(nft), tokenId, price);
+        (uint256 tokenId, uint256 listingId) = mintAndList(user, 1 ether);
 
         vm.prank(user);
         marketplace.delistNFT(listingId);
@@ -88,14 +70,52 @@ contract TestDMarketplace is Test {
         assertEq(marketplace.isListed(address(nft), tokenId, user), false, "Listing should be removed");
     }
 
+    function testDelistNFTRevertsIfNotSeller() public {
+        (uint256 tokenId, uint256 listingId) = mintAndList(user, 1 ether);
+
+        address otherUser = makeAddr("other");
+        vm.prank(otherUser);
+        vm.expectRevert("Not your listing");
+        marketplace.delistNFT(listingId);
+    }
+
+    function testQuickBuyFlow() public {
+        address buyer = makeAddr("buyer");
+        (uint256 tokenId,) = mintListBuy(user, buyer, 1 ether);
+
+        assertEq(nft.ownerOf(tokenId), buyer, "Ownership should be transferred");
+    }
+
+    // -----------------------
+    // 🔧 PRIVATE HELPERS BELOW
+    // -----------------------
+
     function mintAndApprove(address to) private returns (uint256 tokenId) {
-        // Mint to user
         tokenId = nft.nextTokenId();
         vm.startPrank(to);
         nft.mint(to);
-
-        // ApproveMarketplace
         nft.approve(address(marketplace), tokenId);
         vm.stopPrank();
+    }
+
+    function listNFT(address seller, uint256 tokenId, uint256 price) private returns (uint256 listingId) {
+        listingId = marketplace.listingCounter();
+        vm.prank(seller);
+        marketplace.listNFT(address(nft), tokenId, price);
+    }
+
+    function mintAndList(address seller, uint256 price) private returns (uint256 tokenId, uint256 listingId) {
+        tokenId = mintAndApprove(seller);
+        listingId = listNFT(seller, tokenId, price);
+    }
+
+    function mintListBuy(address seller, address buyer, uint256 price)
+        private
+        returns (uint256 tokenId, uint256 listingId)
+    {
+        (tokenId, listingId) = mintAndList(seller, price);
+        vm.deal(buyer, price);
+        vm.prank(buyer);
+        marketplace.buyNFT{value: price}(listingId);
     }
 }
