@@ -7,8 +7,6 @@ import {MockNFT} from "test/mocks/ERC721Mock.sol";
 import {DMarket} from "contracts/DMarket.sol";
 
 contract TestDMarketplace is Test {
-    string constant TOKEN_URI = "ipfs://test-uri";
-
     address immutable user = makeAddr("user");
     MockNFT nft;
     DMarket marketplace;
@@ -18,6 +16,12 @@ contract TestDMarketplace is Test {
         marketplace = new DMarket();
     }
 
+    /**
+     * Making sure our double mapping (`isListed`) actually blocks duplicate listings.
+     *
+     * Checks that a seller can't list the *same NFT*, eg. same contract + tokenId + seller
+     * more than once without delisting first.
+     */
     function testNoDuplicateListings() public {
         uint256 tokenId = mintAndApprove(user);
         listNFT(user, tokenId, 1);
@@ -70,15 +74,43 @@ contract TestDMarketplace is Test {
         assertEq(marketplace.isListed(address(nft), tokenId, user), false, "Listing should be removed");
     }
 
+    // Test branch: delistNft() reverts if not msg.sender's listing
     function testDelistNFTRevertsIfNotSeller() public {
         (uint256 tokenId, uint256 listingId) = mintAndList(user, 1 ether);
 
         address otherUser = makeAddr("other");
         vm.prank(otherUser);
+
         vm.expectRevert("Not your listing");
         marketplace.delistNFT(listingId);
     }
 
+    // Test branch: marketplace.listNFT() reverts if not msg.sender's NFT
+    // No helper calls here, expectRevert has to happen right before ListNFT()
+    function testListNFTRevertsIfNotOwnerOfNFT() public {
+        uint256 tokenId = mintAndApprove(user);
+        address otherUser = makeAddr("other");
+
+        vm.expectRevert("Not your NFT");
+
+        vm.prank(otherUser);
+        marketplace.listNFT(address(nft), tokenId, 1 ether);
+    }
+
+    //Test branch: marketplace.listNft() reverts if marketplace not approved
+    function testListNFTRevertsIfMarketplaceNotApproved() public {
+        uint256 tokenId = nft.nextTokenId();
+
+        vm.prank(user);
+        nft.mint(user);
+
+        vm.expectRevert("Marketplace not approved");
+
+        vm.prank(user);
+        marketplace.listNFT(address(nft), tokenId, 1 ether);
+    }
+
+    // Minimal test to get the full flow from mintToBuy
     function testQuickBuyFlow() public {
         address buyer = makeAddr("buyer");
         (uint256 tokenId,) = mintListBuy(user, buyer, 1 ether);
@@ -90,6 +122,7 @@ contract TestDMarketplace is Test {
     // 🔧 PRIVATE HELPERS BELOW
     // -----------------------
 
+    /* Added many helpers here to follow DRY principled (dont repeat yourself) */
     function mintAndApprove(address to) private returns (uint256 tokenId) {
         tokenId = nft.nextTokenId();
         vm.startPrank(to);
