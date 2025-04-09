@@ -16,6 +16,9 @@ contract TestDMarketplace is Test {
         marketplace = new DMarket();
     }
 
+    // Prevents VSCode false errors
+    event NFTBought(uint256 indexed listingId, address indexed buyer, uint256 price);
+
     /**
      * Making sure our double mapping (`isListed`) actually blocks duplicate listings.
      *
@@ -54,7 +57,7 @@ contract TestDMarketplace is Test {
         vm.deal(buyer, price * 2);
 
         vm.expectEmit(true, true, false, false, address(marketplace));
-        emit DMarket.NFTBought(listingId, buyer, price);
+        emit NFTBought(listingId, buyer, price);
 
         vm.prank(buyer);
         marketplace.buyNFT{value: price}(listingId);
@@ -76,7 +79,7 @@ contract TestDMarketplace is Test {
 
     // Test branch: delistNft() reverts if not msg.sender's listing
     function testDelistNFTRevertsIfNotSeller() public {
-        (uint256 tokenId, uint256 listingId) = mintAndList(user, 1 ether);
+        (, uint256 listingId) = mintAndList(user, 1 ether);
 
         address otherUser = makeAddr("other");
         vm.prank(otherUser);
