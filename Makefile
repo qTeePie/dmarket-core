@@ -6,6 +6,8 @@ RPC_URL=http://127.0.0.1:8545
 SCRIPT=script/DeploySimpleNFT.s.sol
 OZ_LIB=base/openzeppelin-contracts
 
+MARKETPLACE_ADDRESS_FILE=data/DeployAddress.txt
+MARKETPLACE_CONTRACT=$(shell cat $(MARKETPLACE_ADDRESS_FILE))
 # Start Anvil (local testnet)
 anvil:
 	anvil
@@ -41,4 +43,4 @@ deploy-market:
 
 # Read NFT Listing mapping
 read-listing:
-	cast call $(MARKETPLACE) "listings(uint256)(address,address,uint256,uint256,bool)" $(LISTING_ID) --rpc-url $(RPC_URL)
+	cast call $(MARKETPLACE_CONTRACT) "listings(uint256)(address,address,uint256,uint256,bool)" $(LISTING_ID) --rpc-url $(RPC_URL)

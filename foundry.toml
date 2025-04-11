@@ -1,8 +1,11 @@
 [profile.default]
-src = "src"
+src = "contracts"
 out = "out"
 libs = ["base"]
 ignored_warnings = ["Source not found", "File import callback failed"]
+fs_permissions = [
+    { access = 'read-write', path = './data/' }
+]
 
 remappings = [
     "@openzeppelin/contracts=base/openzeppelin-contracts/contracts",
