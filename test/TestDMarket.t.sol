@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import {MockNFT} from "test/mocks/ERC721Mock.sol";
-import {DMarket} from "contracts/DMarket.sol";
+import {MockNFT} from "./mocks/ERC721Mock.sol";
+import {DMarket} from "../contracts/DMarket.sol";
 
 contract TestDMarketplace is Test {
     address immutable user = makeAddr("user");
